@@ -155,12 +155,12 @@ output_excel_timeline <- function(d, timespan, title){
   
   # 年・月のベクターを生成
   if(timespan == "月"){
-    timerange_year <- seq(timerange[1] |> ymd(), timerange[2] |> ymd()  + months(1), by = "month") |> year()
+    timerange_year <- seq(timerange[1] |> ymd(), timerange[2] |> ymd() %m+% months(1), by = "month") |> year()
     timerange_year <- if_else(c(1, timerange_year[-length(timerange_year)]) == timerange_year, "", as.character(timerange_year))
     if(timerange[1] |> ymd() |> day() > 16){
       timerange_month <- seq(timerange[1] |> ymd() - days(15), timerange[2] |> ymd()  + days(15), by = "month") |> month()      
     } else {
-      timerange_month <- seq(timerange[1] |> ymd(), timerange[2] |> ymd()  + months(1), by = "month") |> month()      
+      timerange_month <- seq(timerange[1] |> ymd(), timerange[2] |> ymd() %m+% months(1), by = "month") |> month()      
     }
 
   } else if(timespan == "週"){
@@ -176,12 +176,14 @@ output_excel_timeline <- function(d, timespan, title){
     timerange_day <- seq(timerange[1] |> ymd(), timerange[2] |> ymd()  + days(1), by = "day") |> day() |> suppressWarnings()   
   }
   
+  row_n <- nrow(TL_d_forExcel)
+  
   # タイムラインのデータフレームを整理し、埋めるセルを評価しやすくする
   if(timespan == "月"){
     TL_d_forExcel <- 
       TL_d_forExcel |> 
       mutate(
-        id = as.integer(id),
+        id = 1:row_n,
         group = as.integer(group),
         position_start = interval(timerange[1], start) |> time_length(unit="month") |> floor() + 3, # 開始位置の指定
         position_end = interval(timerange[1], end) |> time_length(unit="month") |> floor() + 3, # 終了位置の指定
@@ -192,7 +194,7 @@ output_excel_timeline <- function(d, timespan, title){
     TL_d_forExcel <- 
       TL_d_forExcel |> 
       mutate(
-        id = as.integer(id),
+        id = 1:row_n,
         group = as.integer(group),
         position_start = interval(timerange[1], start) |> time_length(unit="week") |> floor() + 3, # 開始位置の指定
         position_end = interval(timerange[1], end) |> time_length(unit="week") |> floor() + 3, # 終了位置の指定
@@ -203,7 +205,7 @@ output_excel_timeline <- function(d, timespan, title){
     TL_d_forExcel <- 
       TL_d_forExcel |> 
       mutate(
-        id = as.integer(id),
+        id = 1:row_n,
         group = as.integer(group),
         position_start = interval(timerange[1], start) |> time_length(unit="day") |> floor() + 3, # 開始位置の指定
         position_end = interval(timerange[1], end) |> time_length(unit="day") |> floor() + 3, # 終了位置の指定
