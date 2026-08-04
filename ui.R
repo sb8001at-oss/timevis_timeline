@@ -66,7 +66,8 @@ ui <- page_sidebar(
         actionButton("delete_group", "グループ削除")
       )
     ),
-    tags$a(href = "https://github.com/sb8001at_oss/timevis_timeline", icon("github"))
+    p("ソースコード"),
+    tags$a(href = "https://github.com/sb8001at-oss/timevis_timeline", icon("github"))
   ),  
   
   navset_tab(
