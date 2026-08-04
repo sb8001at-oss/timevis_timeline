@@ -5,6 +5,18 @@ library(dplyr)
 library(shinyscreenshot)
 library(openxlsx2)
 library(lubridate)
+library(zip)
+
+# システムの zip コマンドおよび bsdtar の使用を無効化し、zip パッケージを使わせる
+options("openxlsx2.no_utils_zip" = TRUE)
+options("openxlsx2.no_bsdtar" = TRUE)
+options("openxlsx2.no_maybe_zip" = TRUE)
+
+downloadButton <- function(...) {
+  tag <- shiny::downloadButton(...)
+  tag$attribs$download <- NULL
+  tag
+}
 
 # フォントへのパスを指定
 sysfonts::font_paths("./")
