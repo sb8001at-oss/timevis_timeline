@@ -19,13 +19,13 @@ downloadButton <- function(...) {
 }
 
 # フォントへのパスを指定
-sysfonts::font_paths("./")
+#sysfonts::font_paths("./")
 
 # NotoSansJPをGoogle fontsからダウンロード
-sysfonts::font_add("noto", "NotoSansJP-VariableFont_wght.ttf") 
+#sysfonts::font_add("noto", "NotoSansJP-VariableFont_wght.ttf") 
 
 # showtextでのフォント設定を自動的に適用する
-showtext::showtext_auto()
+#showtext::showtext_auto()
 
 # Excel出力時の時間間隔を指定するときに用いるベクター
 timespan_translate <- c(month = "月", week = "週", day = "日")
