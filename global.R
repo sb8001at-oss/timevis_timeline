@@ -113,10 +113,16 @@ add_TLlist_f <- function(TL_d, content, start, end, group, type, style){
 
 # 日時の文字列表示を整える関数
 prettyDate <- function(d) {
+  pd <- \(d){
+    posix <- as.POSIXct(d, format = "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
+    corrected <- lubridate::with_tz(posix, "UTC")
+    format(corrected, "%Y-%m-%d")}
   if (is.null(d)) return()
-  posix <- as.POSIXct(d, format = "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
-  corrected <- lubridate::with_tz(posix, "UTC")
-  format(corrected, "%Y-%m-%d")
+  ifelse(
+    grepl("^\\d{4}-\\d{2}-\\d{2}$", d), # すでにYYYY-MM-DDである場合に対応できるようにする
+    d,
+    pd(d)
+  )
 }
 
 # Excelでタイムラインを出力するための関数
@@ -135,7 +141,7 @@ output_excel_timeline <- function(d, timespan, title){
   
   # 日時データ・グループを処理しやすいよう編集
   TL_d_forExcel$start <- prettyDate(TL_d_forExcel$start)
-  TL_d_forExcel$end <- prettyDate(TL_d_forExcel$end)
+  TL_d_forExcel$end <- if_else(TL_d_forExcel$end |> is.na(), prettyDate(TL_d_forExcel$start), prettyDate(TL_d_forExcel$end))
   TL_d_forExcel$group <- as.integer(TL_d_forExcel$group)
   
   # スケジュールの最も早い・遅い日時を取得  
@@ -185,8 +191,8 @@ output_excel_timeline <- function(d, timespan, title){
       mutate(
         id = 1:row_n,
         group = as.integer(group),
-        position_start = interval(timerange[1], start) |> time_length(unit="month") |> floor() + 3, # 開始位置の指定
-        position_end = interval(timerange[1], end) |> time_length(unit="month") |> floor() + 3, # 終了位置の指定
+        position_start = interval(timerange[1], start) |> time_length(unit="month") |> ceiling() + 3, # 開始位置の指定
+        position_end = interval(timerange[1], end) |> time_length(unit="month") |> ceiling() + 3, # 終了位置の指定
         fillcells_value = paste0(colLetters[position_start], id + 2), # ラベルを埋める部分のセルを指定
         fillcells = if_else(position_end - position_start == 0, fillcells_value, paste0(colLetters[position_start], id +2, ":", colLetters[position_end], id +2)) # 色を埋めるセル（スケジュールの期間）を指定
       )
@@ -196,8 +202,8 @@ output_excel_timeline <- function(d, timespan, title){
       mutate(
         id = 1:row_n,
         group = as.integer(group),
-        position_start = interval(timerange[1], start) |> time_length(unit="week") |> floor() + 3, # 開始位置の指定
-        position_end = interval(timerange[1], end) |> time_length(unit="week") |> floor() + 3, # 終了位置の指定
+        position_start = interval(timerange[1], start) |> time_length(unit="week") |> ceiling() + 3, # 開始位置の指定
+        position_end = interval(timerange[1], end) |> time_length(unit="week") |> ceiling() + 3, # 終了位置の指定
         fillcells_value = paste0(colLetters[position_start], id + 3), # ラベルを埋める部分のセルを指定
         fillcells = if_else(position_end - position_start == 0, fillcells_value, paste0(colLetters[position_start], id +3, ":", colLetters[position_end], id +3)) # 色を埋めるセル（スケジュールの期間）を指定
       )
@@ -207,8 +213,8 @@ output_excel_timeline <- function(d, timespan, title){
       mutate(
         id = 1:row_n,
         group = as.integer(group),
-        position_start = interval(timerange[1], start) |> time_length(unit="day") |> floor() + 3, # 開始位置の指定
-        position_end = interval(timerange[1], end) |> time_length(unit="day") |> floor() + 3, # 終了位置の指定
+        position_start = interval(timerange[1], start) |> time_length(unit="day") |> ceiling() + 3, # 開始位置の指定
+        position_end = interval(timerange[1], end) |> time_length(unit="day") |> ceiling() + 3, # 終了位置の指定
         fillcells_value = paste0(colLetters[position_start], id + 4), # ラベルを埋める部分のセルを指定
         fillcells = if_else(position_end - position_start == 0, fillcells_value, paste0(colLetters[position_start], id +4, ":", colLetters[position_end], id +4)) # 色を埋めるセル（スケジュールの期間）を指定
       )
@@ -217,7 +223,17 @@ output_excel_timeline <- function(d, timespan, title){
   # 1日しか差がないときの取り扱いを指定
   TL_d_forExcel <- 
     TL_d_forExcel |> 
-    mutate(position_end = if_else(position_end - position_start == 1, position_start, position_end))
+    mutate(
+      position_end = if_else(position_end - position_start == 1, position_start, position_end),
+      fillcells = 
+        ifelse(
+          end |> ymd() |> month() - start |> ymd() |> month() == 1 & 
+          end |> ymd() |> year() == start |> ymd() |> year() &
+          end |> ymd() |> day() - start |> ymd() |> day() < 4,
+          fillcells_value,
+          fillcells
+          )
+      )
 
   # タイムラインを埋めるセルの範囲を指定
   if(timespan == "月"){
@@ -237,6 +253,7 @@ output_excel_timeline <- function(d, timespan, title){
   wb$add_data("タイムライン_データ", TL_d_forExcel)$set_col_widths("タイムライン_データ", cols = 1:11, widths = "auto")
   wb$add_data("グループ_データ", group_d_forExcel)$set_col_widths("グループ_データ", cols = 1:3, widths = "auto")
   
+ 
   # セルの幅を調整
   wb$set_col_widths(sheet = "タイムライン", cols = write_tl_range, widths = 2.27)
   wb$set_col_widths(sheet = "タイムライン", cols = 1, widths = 12.42)
@@ -249,6 +266,7 @@ output_excel_timeline <- function(d, timespan, title){
       add_data(sheet = "タイムライン", TL_d_forExcel$content[i], dims = TL_d_forExcel$fillcells_value[i])
   }
   
+
   # 年・月・週・月のデータ、罫線の追加
   wb$
     add_data(sheet = "タイムライン", timerange_year |> matrix(nrow = 1), col_names=FALSE, start_col = 3, start_row = 1)$
