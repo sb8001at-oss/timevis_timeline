@@ -1,30 +1,22 @@
 ui <- page_sidebar(
-  theme = bs_theme(bootswatch = "minty"),
+  theme = bs_theme(bootswatch = "united"),
   title = "タイムライン作成",
   sidebar = sidebar(  
-    card(
-      card_header(
-        "タイムラインをアップロードする"
-      ),
-      card_body(
+    accordion(
+      open = FALSE,
+      multiple = FALSE,
+      accordion_panel(
+        "タイムラインをアップロードする",
         fileInput("TL_file", NULL, accept=".Rdata")
-      )
-      
-    ),
-    
-    card(
-      card_header("タイムラインのタイトル"),
-      card_body(
-        textInput("title_in", NULL, value = "タイトル")
-      )
-    ),
-  
-    card(
-      max_height = 300,
-      card_header(
-        "アイテムを追加する"
       ),
-      card_body(
+      
+      accordion_panel(
+        "タイムラインのタイトル",
+        textInput("title_in", NULL, value = "タイトル")
+      ),
+    
+      accordion_panel(
+        "イベントを追加する",
         textInput("name_item", "項目名", value = "XXX"),
         dateInput("date_start", "開始日", value = Sys.Date()), 
         dateInput("date_end", "終了日", value = Sys.Date()+months(1)),
@@ -35,16 +27,27 @@ ui <- page_sidebar(
           selected = "range"
         ),
         uiOutput("group_names_input"),
-        actionButton("add_TL", "アイテム追加")
-      )
-    ),
-
-    card(
-      max_height = 300,
-      card_header(
-        "グループを追加する"
+        actionButton("add_TL", "イベント追加")
       ),
-      card_body(
+  
+      accordion_panel(
+        "イベントを編集する",
+        uiOutput("event_names_input"),
+        textInput("name_item_update", "項目名", value = "XXX"),
+        dateInput("date_start_update", "開始日", value = Sys.Date()), 
+        dateInput("date_end_update", "終了日", value = Sys.Date()+months(1)),
+        selectInput(
+          "type_item_update",
+          "タイプ",
+          choices = c("box", "range", "point"),
+          selected = "range"
+        ),
+        uiOutput("group_names_input2"),
+        actionButton("update_TL", "イベント編集")
+      ),
+      
+      accordion_panel(
+        "グループを追加する",
         textInput("name_new_group", "グループ名", value = "YYY"),
         selectInput(
           "style_new_group",
@@ -57,17 +60,27 @@ ui <- page_sidebar(
           htmlOutput("css_TL_image")        
         ),
         actionButton("add_group", "グループ追加")
-      )
-    ),
-    card(
-      card_header("グループを削除する"),
-      card_body(
-        uiOutput("group_names_input"),
+      ),
+      
+      accordion_panel(
+        "グループを削除する",
+        uiOutput("group_names_input3"),
         actionButton("delete_group", "グループ削除")
+      ),
+      
+      accordion_panel(
+        "タイムラインデータを保存する",
+        downloadButton("downloadData", "ダウンロード")
+      ),
+      
+      accordion_panel(
+        "Excelファイルを出力する",
+        selectInput("timespan_selected", "出力の間隔", choices = c("月", "週", "日"), selected = "月"),
+        downloadButton("downloadExcel", "ダウンロード")
       )
     ),
-    p("ソースコード"),
-    tags$a(href = "https://github.com/sb8001at-oss/timevis_timeline", icon("github"))
+    
+    tags$a(href = "https://github.com/sb8001at-oss/timevis_timeline", icon("github"), "ソースコード", target = "_blank")
   ),  
   
   navset_tab(
@@ -80,30 +93,12 @@ ui <- page_sidebar(
 
     nav_panel(
       title = "詳細データ", 
-      layout_columns(
-        col_widths = c(1, 11),
-        card(
-          card_header("タイムラインデータを保存する"), 
-          card_body(downloadButton("downloadData", "ダウンロード"))
-        ),
         
-        card(card_header("タイムラインの情報"), card_body(tableOutput("TL_table")))
-      ),
-      
-      layout_columns(
-        col_widths = c(1, 11),
-        
-        card(
-          card_header("Excelファイルを出力する"),
-          card_body(
-            selectInput("timespan_selected", "出力の間隔", choices = c("月", "週", "日"), selected = "月"),
-            downloadButton("downloadExcel", "ダウンロード")
-          )
-        ),
-        
-        card(card_header("グループの情報"), card_body(tableOutput("group_table")))
-      )
+      card(card_header("タイムラインの情報"), card_body(tableOutput("TL_table"))),
+
+      card(card_header("グループの情報"), card_body(tableOutput("group_table")))
     ),
+    
     nav_panel(
       title = "使い方について",
       br(),

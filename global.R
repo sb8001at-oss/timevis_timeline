@@ -69,6 +69,24 @@ group_style <-
     deepPu = "background-color: #F7F5FC; color: #311B92;"  # 15. Deep Purple
   )
 
+TL_color_names <- c(
+  blue   = "ライトブルー",
+  red    = "ライトレッド",
+  green  = "ライトグリーン",
+  orange = "オレンジ",
+  purple = "パープル",
+  teal   = "ティール",
+  pink   = "ピンク",
+  blueGr = "ブルーグレー",
+  yellow = "イエロー",
+  indigo = "インディゴ",
+  deepOr = "ディープオレンジ",
+  lime   = "ライム",
+  amber  = "アンバー",
+  cyan   = "シアン",
+  deepPu = "ディープパープル"
+)
+
 # 起動時に表示されるグループ・タイムラインのデータを準備
 default_group <- 
   tibble(
@@ -126,7 +144,7 @@ prettyDate <- function(d) {
 }
 
 # Excelでタイムラインを出力するための関数
-output_excel_timeline <- function(d, timespan, title){
+output_excel_timeline <- function(d, timespan){
   # 列名のベクトルを作成
   colLetters <- 
     paste0(rep(c("", LETTERS), rep(26, 27)), LETTERS)

@@ -43,7 +43,7 @@ function(input, output, session) {
     input$delete_group,
     {
       # groupのidを取得し，イベントを含むグループを削除する場合にはエラーメッセージを表示する
-      group_delete_id <- group_d()$id[group_d()$content %in% input$group_item]
+      group_delete_id <- group_d()$id[group_d()$content %in% input$group_item3]
       if(sum(timeline_d()$group %in% group_delete_id) > 0){
         showNotification("イベントが設定されているグループは削除できません", duration = 5, type = "error")
         return(0)
@@ -107,7 +107,44 @@ function(input, output, session) {
       timeline_d(current_TL_d)
     }
   )
+
   
+  # イベントの編集
+  observeEvent(
+    input$update_TL,
+    {
+      # 終了日が開始日より前の場合にはエラーメッセージを表示し，イベントを追加しない
+      if(ymd(input$date_end_update) < ymd(input$date_start_update)){
+        showNotification("終了日は開始日より後に設定してください", duration = 5, type = "error")
+        return(0)
+      }
+      
+      # イベントの色はグループから設定するようにしている
+      style_TL_index <- which(group_style == group_d() |> filter(content == input$group_item2) |> _$style)
+      
+      # box，pointを選択した場合には終了日と開始日を同日とする
+      temp_end <-
+        if_else(input$type_item_update == "range", input$date_end_update, input$date_start_update)
+      
+      # timeline用のデータフレームをアップデート
+        current_TL_d <- input$vistimeline_data
+        current_TL_d <-
+          current_TL_d |> 
+          mutate(eventtag = paste(id, ", ", content)) |> 
+          filter(eventtag != input$TLcontent) |> 
+          select(-eventtag) |> 
+          add_TLlist_f(
+            content = input$name_item_update,
+            start = input$date_start_update,
+            end = temp_end,
+            group = group_d() |> filter(content == input$group_item2) |> _$id |> as.character(),
+            type = input$type_item_update,
+            style = TL_style[style_TL_index]
+          )
+      timeline_d(current_TL_d)
+    }
+  )
+    
   # グループの色指定をわかりやすくするためのテキストを準備
   output$css_group_image <- 
     renderText({
@@ -147,12 +184,44 @@ function(input, output, session) {
       )
     )
   
+  # グループを追加したら，グループ名のselectInputをアップデートする2（名前の問題を解決するためのもの）
+  output$group_names_input2 <-
+    renderUI(
+      selectInput(
+        "group_item2", 
+        "グループ", 
+        choices = group_d()$content
+      )
+    )  
+
+  # グループを追加したら，グループ名のselectInputをアップデートする3（名前の問題を解決するためのもの）
+  output$group_names_input3 <-
+    renderUI(
+      selectInput(
+        "group_item3", 
+        "グループ", 
+        choices = group_d()$content
+      )
+    )  
+  
+  
+  # イベント変更のためのUIを準備する
+  output$event_names_input <-
+    renderUI(
+      selectInput(
+        "TLcontent", 
+        "イベント名", 
+        choices = paste(input$vistimeline_data$id, ", ", input$vistimeline_data$content)
+      )
+    )  
+  
   # イベント・グループのデータを表示する
   output$TL_table <- renderTable({
     input$vistimeline_data |> 
       mutate(
         start = prettyDate(start),
-        end = prettyDate(end)
+        end = prettyDate(end),
+        style = TL_color_names[which(TL_style == style) |> names()]
         ) |> 
       rename(`項目` = content, `開始` = start, `完了` = end, `グループ` = group, , `タイプ` = type, `スタイル` = style) 
   })
@@ -160,7 +229,8 @@ function(input, output, session) {
   output$group_table <- renderTable({
     group_d() |> 
       mutate(
-        id = as.integer(id)
+        id = as.integer(id),
+        style = TL_color_names[which(group_style == style) |> names()]
       ) |> 
       rename(`グループ名` = content, `スタイル` = style) 
   })
@@ -194,7 +264,7 @@ function(input, output, session) {
         validate(need(FALSE, NULL)) 
       }
       
-      output_excel_timeline(list(input$vistimeline_data, group_d(), input$title_in), input$timespan_selected, input$title_in)$save(file)
+      output_excel_timeline(list(input$vistimeline_data, group_d(), input$title_in), input$timespan_selected)$save(file)
     }
   )
 }
