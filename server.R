@@ -211,7 +211,7 @@ function(input, output, session) {
       selectInput(
         "TLcontent", 
         "イベント名", 
-        choices = paste(input$vistimeline_data$id, ", ", input$vistimeline_data$content)
+        choices = paste(input$vistimeline_data$id, ", ", input$vistimeline_data$content),
       )
     )  
   
@@ -264,7 +264,7 @@ function(input, output, session) {
         validate(need(FALSE, NULL)) 
       }
       
-      output_excel_timeline(list(input$vistimeline_data, group_d(), input$title_in), input$timespan_selected)$save(file)
+      output_excel_timeline(list(input$vistimeline_data, group_d(), input$title_in), input$timespan_selected, input$mode_output, input$color_output)$save(file)
     }
   )
 }
