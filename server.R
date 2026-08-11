@@ -220,8 +220,7 @@ function(input, output, session) {
     input$vistimeline_data |> 
       mutate(
         start = prettyDate(start),
-        end = prettyDate(end),
-        style = TL_color_names[which(TL_style == style) |> names()]
+        end = prettyDate(end)
         ) |> 
       rename(`項目` = content, `開始` = start, `完了` = end, `グループ` = group, , `タイプ` = type, `スタイル` = style) 
   })
