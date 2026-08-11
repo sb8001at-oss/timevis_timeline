@@ -228,8 +228,7 @@ function(input, output, session) {
   output$group_table <- renderTable({
     group_d() |> 
       mutate(
-        id = as.integer(id),
-        style = TL_color_names[which(group_style == style) |> names()]
+        id = as.integer(id)
       ) |> 
       rename(`グループ名` = content, `スタイル` = style) 
   })
