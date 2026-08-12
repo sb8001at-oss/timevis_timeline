@@ -152,8 +152,8 @@ output_excel_timeline <- function(d, timespan, mode, colorfills){
     paste0(rep(c("", LETTERS), rep(26, 27)), LETTERS)
   
   # タイムラインのセルの色（backcolor2とグラデーションにできるようにする）
-  backcolor =  c(blue = "#90CAF9", red = "#EF9A9A", green = "#A5D6A7", orange = "#FFCC80", purple = "#CE93D8", teal = "#80CBC4", pink = "#F48FB1", blueGr = "#B0BEC5", yellow = "#FFF59D", indigo = "#9FA8DA", deepOr = "#FFAB91", lime = "#E6EE9C", amber = "#FFE082", cyan = "#80DEEA", deepPu = "#B39DDB")
-  backcolor2 = c(blue = "#B2EAFF", red = "#FAD2D2", green = "#D4EDDA", orange = "#FFE8CC", purple = "#EBE0F5", teal = "#D1F0EC", pink = "#FBD2E0", blueGr = "#E2E8F0", yellow = "#FFFDE0", indigo = "#DCE2F7", deepOr = "#FFDEC9", lime = "#F4F8D6", amber = "#FFF2CC", cyan = "#D1F5F8", deepPu = "#E4DCF5")
+  backcolor =  rep(c(blue = "#90CAF9", red = "#EF9A9A", green = "#A5D6A7", orange = "#FFCC80", purple = "#CE93D8", teal = "#80CBC4", pink = "#F48FB1", blueGr = "#B0BEC5", yellow = "#FFF59D", indigo = "#9FA8DA", deepOr = "#FFAB91", lime = "#E6EE9C", amber = "#FFE082", cyan = "#80DEEA", deepPu = "#B39DDB"), 3)
+  backcolor2 = rep(c(blue = "#B2EAFF", red = "#FAD2D2", green = "#D4EDDA", orange = "#FFE8CC", purple = "#EBE0F5", teal = "#D1F0EC", pink = "#FBD2E0", blueGr = "#E2E8F0", yellow = "#FFFDE0", indigo = "#DCE2F7", deepOr = "#FFDEC9", lime = "#F4F8D6", amber = "#FFF2CC", cyan = "#D1F5F8", deepPu = "#E4DCF5"), 3)
   
   # タイムラインのデータフレーム、グループのデータフレーム、タイトルを抽出（Shinyでは置き換えが必要）
   TL_d_forExcel <- d[[1]]

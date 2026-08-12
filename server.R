@@ -160,13 +160,11 @@ function(input, output, session) {
   output$vistimeline <-
     renderTimevis(
       timevis(
-        data = timeline_d(), 
+        data = timeline_d() |> mutate(title = paste(content, ", 開始日：", prettyDate(start))), 
         groups = group_d(), 
         showZoom = FALSE,
         options = 
           list(
-            min = ymd(timeline_d()$start) |> min() |> suppressWarnings() - days(30), 
-            max = ymd(timeline_d()$end) |> max() |> suppressWarnings() + days(30), 
             editable = TRUE, 
             multiselect = TRUE,
             showCurrentTime = FALSE
@@ -222,6 +220,7 @@ function(input, output, session) {
         start = prettyDate(start),
         end = prettyDate(end)
         ) |> 
+      select(!title) |> 
       rename(`項目` = content, `開始` = start, `完了` = end, `グループ` = group, , `タイプ` = type, `スタイル` = style) 
   })
   
@@ -257,7 +256,7 @@ function(input, output, session) {
     },
     content = function(file){
       # validate(need(FALSE, NULL))で実行されないはずだが，うまく機能しない
-      if(input$timespan_selected == "日" & length(seq(input$vistimeline_data$start |> prettyDate() |> ymd() |> min(na.rm=TRUE), input$vistimeline_data$end |> prettyDate() |> ymd() |> max(na.rm=TRUE), by = "day")) > 700){
+      if(input$timespan_selected == "日" & length(seq(input$vistimeline_data$start |> prettyDate() |> ymd() |> min(na.rm=TRUE), input$vistimeline_data$end |> prettyDate() |> ymd() |> max(na.rm=TRUE), by = "day")) > 335){
         showNotification("スケジュールが長過ぎるので「日」は選択できません。「週」か「月」を選んでください。", duration = 5, type = "error")
         validate(need(FALSE, NULL)) 
       }
