@@ -160,7 +160,7 @@ function(input, output, session) {
   output$vistimeline <-
     renderTimevis(
       timevis(
-        data = timeline_d() |> mutate(title = paste(content, ", 開始日：", prettyDate(start))), 
+        data = timeline_d() |> mutate(title = paste(content, " 開始日：", prettyDate(start), " 終了日：", prettyDate(end))), 
         groups = group_d(), 
         showZoom = FALSE,
         options = 
