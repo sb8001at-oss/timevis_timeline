@@ -7,6 +7,11 @@ function(input, output, session) {
   timeline_d <- reactiveVal(default_TL)
   group_d <- reactiveVal(default_group)
   
+  observeEvent(
+    input$vistimeline_data, {
+    timeline_d(input$vistimeline_data)  
+  })
+  
   # グループの追加
   observeEvent(
     input$add_group, 
